@@ -30,7 +30,7 @@ public class Complement extends AbstractRule {
       Prob inverseWanted = new Prob(wanted.terms.get(0).inverse(), wanted.given);
       Known inverse = context.find(inverseWanted, depth);
       if(inverse!=null) {
-        Known result = new Known(1.0 - inverse.value);
+        Known result = new Known(wanted, 1.0 - inverse.value);
         result.input = false;
 
         result.byRule = this;

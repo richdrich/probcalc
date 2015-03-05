@@ -17,7 +17,8 @@ import java.util.Map;
  * @author richard.parratt
  */
 public class Known {
-  public Known(double v) {
+  public Known(Prob prob, double v) {
+    this.prob = prob;
     value = v;
     input = true;
     byRule = null;
@@ -33,28 +34,32 @@ public class Known {
   @Override
   public String toString() {
     if(input) {
-      return String.format("[%f]", value);
+      return String.format("%s: [%f]", prob, value);
     }
 
-    return "{" + byRule.getClass().getSimpleName() + "} : " + formula + " => " + evaluation + " => " + Double.toString(value);
+    return prob.toString() + ": {" + byRule.getClass().getSimpleName() + "} : " + formula + " => " + evaluation + " => " + Double.toString(value);
   }
 
   public String dump() {
-    return dump(this);
+    return dumpTerms(this);
   }
 
-  private String dump(Known topTerm) {
+  private String dumpTerms(Known topTerm) {
     if(input) {
       return toString() + "\n";
     }
 
     StringBuilder res = new StringBuilder();
     for(Map.Entry<String, Known> e : inputTerms.entrySet()) {
-      res.append(e.getKey() + " = " + e.getValue().dump(this));
+      res.append(e.getValue().dumpTerms(this));
     }
-    return res.toString() + toString() + "\n";
+
+    res.append(toString() + "\n");
+
+    return res.toString();
   }
 
+  public Prob prob;
   public double value;
   public boolean input;
   public Rule byRule;

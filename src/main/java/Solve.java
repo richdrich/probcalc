@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class Solve {
   public Solve(Map<Prob, Double> inputs) {
-    this.inputs = inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Known(e.getValue())));
+    this.inputs = inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new Known(e.getKey(), e.getValue())));
     this.rules = null;
   }
 

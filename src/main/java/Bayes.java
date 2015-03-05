@@ -38,7 +38,7 @@ public class Bayes extends AbstractRule {
     Known y = context.find(probY, depth);
     if(y==null) return null;
 
-    Known k = new Known((yGivenX.value * x.value) / y.value);
+    Known k = new Known(wanted, (yGivenX.value * x.value) / y.value);
     k.input = false;
     k.byRule = this;
 
