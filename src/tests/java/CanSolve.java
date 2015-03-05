@@ -96,11 +96,12 @@ public class CanSolve {
     initSolve();
 
     Known c = solve.find(new Prob(new Term("C")), 0);
+    System.out.printf("multiplyAbsolute c:\n%s\n", c.dump());
+
     assertThat(c).isNotNull();
     assertThat(c.input).isFalse();
    // assertThat(c.byRule.getClass()).isEqualTo((Class) Bayes.class);
-    assertThat(c.value).isEqualTo(0.05, offset(0.001));  // Same as B
-    System.out.printf("multiplyAbsolute:\n%s\n", c.dump());
+    assertThat(c.value).isEqualTo(0.00875, offset(0.001));
 
   }
 }
