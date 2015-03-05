@@ -27,17 +27,22 @@ import static org.fest.assertions.data.Offset.offset;
 public class CanSolve {
 
   public Solve solve;
+  private Map<Prob, Double> inputs;
 
   @Before
   public void setup() {
-    Map<Prob, Double> inputs = new HashMap<>();
+    inputs = new HashMap<Prob, Double>();
     inputs.put(new Prob(new Term("A")), 0.75);
     inputs.put(new Prob(new Term("B")), 0.05);
     inputs.put(new Prob(new Term("B"), new Term("A")), 0.005);
     inputs.put(new Prob(new Term("B"), new Term("A", false)), 0.02);
 
+    initSolve();
+  }
+
+  private void initSolve() {
     solve = new Solve(inputs);
-    solve.rules = Arrays.asList(new Rule[] {new Complement(solve), new Bayes(solve)});
+    solve.rules = Arrays.asList(new Rule[]{new Complement(solve), new Bayes(solve), new MultiplyAbsolute(solve)});
   }
 
   @Test
@@ -81,6 +86,21 @@ public class CanSolve {
     assertThat(notAGivenB.byRule.getClass()).isEqualTo((Class) Bayes.class);
     assertThat(notAGivenB.value).isEqualTo((0.02 * 0.25) / 0.05, offset(0.001));  // P(B|~A) P(~A) / P(B)
     System.out.printf("bayes notAGivenB:\n%s\n", notAGivenB.dump());
+
+  }
+
+  @Test
+  public void multiplyAbsolute() {
+    inputs.put(new Prob(new Term("C"), new Term("A")), 0.005);
+    inputs.put(new Prob(new Term("C"), new Term("A", false)), 0.02);
+    initSolve();
+
+    Known c = solve.find(new Prob(new Term("C")), 0);
+    assertThat(c).isNotNull();
+    assertThat(c.input).isFalse();
+   // assertThat(c.byRule.getClass()).isEqualTo((Class) Bayes.class);
+    assertThat(c.value).isEqualTo(0.05, offset(0.001));  // Same as B
+    System.out.printf("multiplyAbsolute:\n%s\n", c.dump());
 
   }
 }

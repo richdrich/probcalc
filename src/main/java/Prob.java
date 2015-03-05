@@ -9,8 +9,11 @@
  * with EDMI.
  */
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * // TODO class Javadoc
@@ -94,6 +97,17 @@ public class Prob {
     }
     res.append(")");
     return res.toString();
+  }
+
+  public Set<String> allTermNames() {
+    Set<String> res = new HashSet<>();
+    for(Term term : terms) {
+      res.add(term.name);
+    }
+    for(Term term : given) {
+      res.add(term.name);
+    }
+    return res;
   }
 
   public List<Term> terms;

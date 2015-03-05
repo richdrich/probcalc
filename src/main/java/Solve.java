@@ -9,8 +9,10 @@
  * with EDMI.
  */
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +34,15 @@ public class Solve {
     return rules.stream().map(r -> r.solve(wanted, depth)).filter(k -> k != null).max((a,b) -> Integer.compare(b.maxDepth(), a.maxDepth())).orElse(null);
   }
 
+  public Set<String> allTermNames() {
+    Set<String> res = new HashSet<>();
+
+    inputs.keySet().stream().forEach(p -> res.addAll(p.allTermNames()));
+
+    return res;
+  }
+
   public Map<Prob, Known> inputs;
   public List<Rule> rules;
+
 }
