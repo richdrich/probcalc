@@ -42,7 +42,7 @@ public class CanSolve {
 
   private void initSolve() {
     solve = new Solve(inputs);
-    solve.rules = Arrays.asList(new Rule[]{new Complement(solve), new Bayes(solve), new MultiplyAbsolute(solve)});
+    solve.rules = Arrays.asList(new Rule[]{new Complement(solve), new And(solve), new Bayes(solve), new MultiplyAbsolute(solve)});
   }
 
   @Test
@@ -55,9 +55,23 @@ public class CanSolve {
   @Test
   public void complement() {
     Known notA = solve.find(new Prob(new Term("A", false)), 0);
+    assertThat(notA).isNotNull();
+    System.out.printf("complement:\n%s\n", notA.dump());
+
     assertThat(notA.input).isFalse();
     assertThat(notA.byRule.getClass()).isEqualTo((Class)Complement.class);
     assertThat(notA.value).isEqualTo(0.25);
+  }
+
+  @Test
+  public void and() {
+    Known aAndB = solve.find(new Prob(Arrays.asList(new Term[] {new Term("A"), new Term("B")})), 0);
+    assertThat(aAndB).isNotNull();
+    System.out.printf("and:\n%s\n", aAndB.dump());
+
+    assertThat(aAndB.input).isFalse();
+    assertThat(aAndB.byRule.getClass()).isEqualTo((Class)And.class);
+    assertThat(aAndB.value).isEqualTo(0.75 * 0.05);
   }
 
   @Test
@@ -103,5 +117,18 @@ public class CanSolve {
    // assertThat(c.byRule.getClass()).isEqualTo((Class) Bayes.class);
     assertThat(c.value).isEqualTo(0.00875, offset(0.001));
 
+  }
+
+  @Test
+  public void multiplyAbsolute2() {
+    inputs.put(new Prob(new Term("C"), Arrays.asList(new Term[]{new Term("A"), new Term("B")})), 0.1);
+    inputs.put(new Prob(new Term("C"), Arrays.asList(new Term[] {new Term("A", false), new Term("B")})), 0.05);
+    inputs.put(new Prob(new Term("C"), Arrays.asList(new Term[] {new Term("A"), new Term("B", false)})), 0.08);
+    inputs.put(new Prob(new Term("C"), Arrays.asList(new Term[] {new Term("A", false), new Term("B", false)})), 0.001);
+    initSolve();
+
+    Known c = solve.find(new Prob(new Term("C")), 0);
+    assertThat(c).isNotNull();
+    System.out.printf("multiplyAbsolute2 c:\n%s\n", c.dump());
   }
 }

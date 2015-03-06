@@ -35,6 +35,8 @@ public class MultiplyAbsolute extends AbstractRule {
   public Known solve(Prob wanted, int depth) {
     if(++depth > 4) return null;
 
+    if(!wanted.given.isEmpty()) return null;  // only applicable for absolute probs
+
     // Find a set of conditional properties for term
     // with the same givens
 

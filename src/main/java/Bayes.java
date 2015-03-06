@@ -26,6 +26,8 @@ public class Bayes extends AbstractRule {
   public Known solve(Prob wanted, int depth) {
     if(++depth > 4) return null;
 
+    if(wanted.given.isEmpty()) return null;  // only applicable for conditional probs
+
     Prob probYgivenX = wanted.swap();
     Known yGivenX = context.find(probYgivenX, depth);
     if(yGivenX==null) return null;

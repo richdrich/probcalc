@@ -9,11 +9,15 @@
  * with EDMI.
  */
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * // TODO class Javadoc
@@ -63,6 +67,37 @@ public class Prob {
     return new Prob(given);
   }
 
+  public static Prob parse(String probText) {
+    Pattern pattern = Pattern.compile("P\\s*\\(\\s*([~\\w\\s]+)(\\|[~\\w\\s]+)?\\)");
+    Matcher matcher = pattern.matcher(probText);
+
+    if(!matcher.matches() || matcher.group(1)==null) {
+      throw new RuntimeException("Prob " + probText + " is not recognized");
+    }
+
+    Prob res = new Prob(extractTerms(matcher.group(1)));
+
+    if(matcher.group(2) != null) {
+      res.given = extractTerms(matcher.group(2));
+    }
+
+    return res;
+  }
+
+  private static List<Term> extractTerms(String group) {
+
+    String[] termStrings = group.trim().replace("|", "").replace("~", " ~").split("\\s");
+    return Arrays.<String>asList(termStrings).stream().map(s -> {
+      s = s.trim();
+      if(s.startsWith("~")) {
+        return new Term(s.substring(1), false);
+      }
+      else {
+        return new Term(s);
+      }
+    }).collect(Collectors.toList());
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -87,11 +122,17 @@ public class Prob {
   public String toString() {
     StringBuilder res = new StringBuilder("P(");
     for(Term term : terms) {
+      if(!res.toString().endsWith("(")) {
+        res.append(" ");
+      }
       res.append(term.toString());
     }
     if(!given.isEmpty()) {
       res.append("|");
       for(Term term : given) {
+        if(!res.toString().endsWith("|")) {
+          res.append(" ");
+        }
         res.append(term.toString());
       }
     }
