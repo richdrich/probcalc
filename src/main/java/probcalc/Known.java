@@ -1,15 +1,8 @@
-/*
- * Copyright (c) 2015 EDMI NZ
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of EDMI. 
- * ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with EDMI.
- */
+package probcalc;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * // TODO class Javadoc
@@ -41,17 +34,22 @@ public class Known {
   }
 
   public String dump() {
-    return dumpTerms(this);
+
+    Set<Prob> seen = new HashSet<>();
+    return dumpTerms(this, seen);
   }
 
-  private String dumpTerms(Known topTerm) {
+  private String dumpTerms(Known topTerm, Set<Prob> seen) {
+    if(seen.contains(prob)) return "";
+    seen.add(prob);
+
     if(input) {
       return toString() + "\n";
     }
 
     StringBuilder res = new StringBuilder();
-    for(Map.Entry<String, Known> e : inputTerms.entrySet()) {
-      res.append(e.getValue().dumpTerms(this));
+    for(Map.Entry<Prob, Known> e : inputTerms.entrySet()) {
+      res.append(e.getValue().dumpTerms(this, seen));
     }
 
     res.append(toString() + "\n");
@@ -59,12 +57,28 @@ public class Known {
     return res.toString();
   }
 
+
+	public static Known findInTree(Map<Prob, Known> alreadyFound, Prob wanted) {
+		if (alreadyFound.containsKey(wanted)) {
+			return alreadyFound.get(wanted);
+		}
+
+		for (Known k : alreadyFound.values()) {
+			if(k.input) continue;
+
+			Known res = findInTree(k.inputTerms, wanted);
+			if (res != null) return res;
+		}
+
+		return null;
+	}
+
   public Prob prob;
   public double value;
   public boolean input;
   public Rule byRule;
   public String formula;
   public String evaluation;
-  public Map<String, Known> inputTerms;
+  public Map<Prob, Known> inputTerms;
 
 }

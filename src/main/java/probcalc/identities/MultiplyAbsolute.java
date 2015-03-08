@@ -1,24 +1,12 @@
-/*
- * Copyright (c) 2015 EDMI NZ
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of EDMI. 
- * ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with EDMI.
- */
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package probcalc.identities;
 
 import com.google.common.collect.Sets;
+import probcalc.Known;
+import probcalc.Prob;
+import probcalc.Solve;
+import probcalc.Term;
+
+import java.util.*;
 
 /**
  * // TODO class Javadoc
@@ -32,10 +20,11 @@ public class MultiplyAbsolute extends AbstractRule {
 
 
   @Override
-  public Known solve(Prob wanted, int depth) {
+  public Known solve(Prob wanted, int depth, Map<Prob, Known> alreadyFound) {
     if(++depth > 4) return null;
 
     if(!wanted.given.isEmpty()) return null;  // only applicable for absolute probs
+    if(wanted.prime) return null; // Not for primes
 
     // Find a set of conditional properties for term
     // with the same givens
@@ -56,6 +45,8 @@ public class MultiplyAbsolute extends AbstractRule {
       // Now we are interested in +/- for each value
       List<Known[]> factors = new ArrayList<>();
       List<String> termNames = new ArrayList(givenComb);
+		Map<Prob, Known> inputTerms = new HashMap<Prob, Known>();
+
       int numBits = givenComb.size();
       int numValues = 1 << numBits;
       boolean incomplete = false;
@@ -69,17 +60,20 @@ public class MultiplyAbsolute extends AbstractRule {
         }
 
         Prob condProb = new Prob(wantedTerms, givenTerms);
-        Known cond = context.find(condProb, depth);
+        Known cond = context.find(condProb, depth, mapUnion(inputTerms, alreadyFound));
         if(cond==null) {
           incomplete = true;
           break;
         }
+        inputTerms.put(condProb, cond);
+
         Prob absProb = new Prob(givenTerms);
-        Known abs = context.find(absProb, depth);
+        Known abs = context.find(absProb, depth, mapUnion(inputTerms, alreadyFound));
         if(abs==null) {
           incomplete = true;
           break;
         }
+        inputTerms.put(absProb, abs);
 
         factors.add(new Known[] {abs, cond});
       }
@@ -89,7 +83,6 @@ public class MultiplyAbsolute extends AbstractRule {
         double result = 0.0;
         StringBuilder formula = new StringBuilder();
         StringBuilder evaluation = new StringBuilder();
-        Map<String, Known> inputTerms = new HashMap<String, Known>();
 
         for(Known[] factor : factors) {
           result += factor[0].value * factor[1].value;
@@ -106,9 +99,6 @@ public class MultiplyAbsolute extends AbstractRule {
           evaluation.append(Double.toString(factor[0].value));
           evaluation.append(" x ");
           evaluation.append(Double.toString(factor[1].value));
-
-          inputTerms.put(absProbName, factor[0]);
-          inputTerms.put(condProbName, factor[1]);
         }
 
         Known k = new Known(wanted, result);

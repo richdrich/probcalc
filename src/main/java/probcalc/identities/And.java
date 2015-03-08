@@ -1,19 +1,16 @@
-/*
- * Copyright (c) 2015 EDMI NZ
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of EDMI. 
- * ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with EDMI.
- */
+package probcalc.identities;
+
+import probcalc.Known;
+import probcalc.Prob;
+import probcalc.Solve;
+import probcalc.Term;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * P(AB) = P(A)P(B)
+ * where A and B are independent
  *
  *
  * @author richard.parratt
@@ -24,19 +21,24 @@ public class And extends AbstractRule {
   }
 
   @Override
-  public Known solve(Prob wanted, int depth) {
+  public Known solve(Prob wanted, int depth, Map<Prob, Known> alreadyFound) {
     if(++depth > 4) return null;
 
     if(!wanted.given.isEmpty()) return null;  // only applicable for absolute probs
+    if(wanted.prime) return null; // Not for primes
 
     double result = 1.0;
     StringBuilder formula = new StringBuilder();
     StringBuilder evaluation = new StringBuilder();
-    Map<String, Known> inputTerms = new HashMap<String, Known>();
+    Map<Prob, Known> inputTerms = new HashMap<Prob, Known>();
 
     for(Term term : wanted.terms) {
+      if(!context.depends.isIndependent(term.name)) {
+        return null;
+      }
+
       Prob prob = new Prob(term);
-      Known factor = context.find(prob, depth);
+      Known factor = context.find(prob, depth, mapUnion(inputTerms, alreadyFound));
       if(factor==null) return null;
 
       result *= factor.value;
@@ -49,7 +51,7 @@ public class And extends AbstractRule {
 
       evaluation.append(Double.toString(factor.value));
 
-      inputTerms.put(prob.toString(), factor);
+      inputTerms.put(prob, factor);
     }
 
     Known k = new Known(wanted, result);
