@@ -2,6 +2,10 @@ import org.junit.Before;
 import org.junit.Test;
 import probcalc.Depends;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
@@ -40,6 +44,18 @@ public class TestDepends {
 
 		assertThat(!depends.isDependent("E", "F"));
 		assertThat(!depends.isDependent("F", "E"));
+	}
+
+	@Test
+	public void nearestCommonAncestors() {
+		List<String> ancestors1 = depends.commonAncestors("F", "E");
+		assertThat(ancestors1).isEqualTo(Arrays.asList(new String[] {"C", "B", "A"}));
+
+		List<String> ancestors2 = depends.commonAncestors("F", "D");
+		assertThat(ancestors2).isEqualTo(Arrays.asList(new String[] {"B", "A"}));
+
+		Set<String> nearestAncestors = depends.nearestCommonAncestors("F", "E");
+		assertThat(nearestAncestors).containsExactly("C");
 
 	}
 }

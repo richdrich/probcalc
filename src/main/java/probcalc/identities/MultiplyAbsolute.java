@@ -9,7 +9,7 @@ import probcalc.Term;
 import java.util.*;
 
 /**
- * // TODO class Javadoc
+ * P(B) = P(A)P(B|A) + P(~A)P(B|~A)
  *
  * @author richard.parratt
  */
@@ -29,7 +29,7 @@ public class MultiplyAbsolute extends AbstractRule {
     // Find a set of conditional properties for term
     // with the same givens
 
-    List<Term> wantedTerms = wanted.terms;
+    Set<Term> wantedTerms = wanted.terms;
 
     // First we find all the candidates
     Set<String> allGivenNames = context.allTermNames();
@@ -44,20 +44,13 @@ public class MultiplyAbsolute extends AbstractRule {
 
       // Now we are interested in +/- for each value
       List<Known[]> factors = new ArrayList<>();
-      List<String> termNames = new ArrayList(givenComb);
-		Map<Prob, Known> inputTerms = new HashMap<Prob, Known>();
+      List<String> termNames = new ArrayList<>(givenComb);
+      Map<Prob, Known> inputTerms = new HashMap<>();
 
       int numBits = givenComb.size();
       int numValues = 1 << numBits;
       boolean incomplete = false;
-      for(int n=0; n<numValues; n++) {
-
-        List<Term> givenTerms = new ArrayList<>();
-        for(int pv=0; pv<numBits; pv++) {
-          boolean bitState = ((n >> pv) & 1) == 1;
-          Term term = new Term(termNames.get(pv), bitState);
-          givenTerms.add(term);
-        }
+      for(Set<Term> givenTerms : Term.combinations(termNames)) {
 
         Prob condProb = new Prob(wantedTerms, givenTerms);
         Known cond = context.find(condProb, depth, mapUnion(inputTerms, alreadyFound));
@@ -114,4 +107,5 @@ public class MultiplyAbsolute extends AbstractRule {
 
     return null;
   }
+
 }

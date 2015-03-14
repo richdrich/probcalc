@@ -134,6 +134,7 @@ public class CanSolve {
     assertThat(aJointB.value).isEqualTo(0.005 * 0.75, offset(0.001));
   }
 
+
   @Test
   public void bayesPartial() {
     Known aGivenBprime = solve.find(Prob.parse("P'(A|B)"));
@@ -155,15 +156,28 @@ public class CanSolve {
     assertThat(aGivenB.value).isEqualTo((0.005 * 0.75) / 0.00875, offset(0.001)); // P(B|A) P(A) / P(B)
   }
 
+//  @Test
+//  public void bayesPartial3() {
+//    inputs.put(Prob.parse("P(C|A)"), 0.02);
+//    inputs.put(Prob.parse("P(D|A)"), 0.03);
+//    initSolve();
+//
+//    Known aGivenBCDprime = solve.find(Prob.parse("P'(A|B C D)"));
+//    assertThat(aGivenBCDprime).isNotNull();
+//    System.out.printf("bayesPartial aGivenBCDprime:\n%s\n", aGivenBCDprime.dump());
+//    assertThat(aGivenBCDprime.value).isEqualTo(0.75 * .005 * .02 * .03, offset(0.0001));
+//  }
+
   @Test
-  public void bayesPartial3() {
-    inputs.put(Prob.parse("P(C|A)"), 0.02);
-    inputs.put(Prob.parse("P(D|A)"), 0.03);
+  public void conditional() {
+    inputs.put(new Prob(new Term("C"), new Term("A")), 0.005);
+    inputs.put(new Prob(new Term("C"), new Term("A", false)), 0.02);
     initSolve();
 
-    Known aGivenBCDprime = solve.find(Prob.parse("P'(A|B C D)"));
-    assertThat(aGivenBCDprime).isNotNull();
-    System.out.printf("bayesPartial aGivenBCDprime:\n%s\n", aGivenBCDprime.dump());
-    assertThat(aGivenBCDprime.value).isEqualTo(0.75 * .005 * .02 * .03, offset(0.0001));
+    Known cGivenB = solve.find(Prob.parse("P(C|B)"));
+    assertThat(cGivenB).isNotNull();
+    System.out.printf("conditional cGivenB:\n%s\n", cGivenB.dump());
+    assertThat(cGivenB.value).isEqualTo((0.005000 * 0.428571) + (0.020000 * 0.571429), offset(0.001) );
   }
+
 }

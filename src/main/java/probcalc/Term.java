@@ -1,11 +1,14 @@
 package probcalc;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
- * // TODO class Javadoc
+ * A probability term which can be true or false according to state
  *
  * @author richard.parratt
  */
-public class Term {
+public class Term implements Comparable<Term> {
   public Term(String name) {
     this.name = name;
     this.state = true;
@@ -14,6 +17,17 @@ public class Term {
   public Term(String name, boolean state) {
     this.name = name;
     this.state = state;
+  }
+
+  public static Set<Term> nthTermCombination(Collection<String> termNames, int n) {
+    Set<Term> givenTerms = new TreeSet<>();
+    List<String> termNameList = new ArrayList<>(termNames);
+    for(int pv=0; pv<termNameList.size(); pv++) {
+	  boolean bitState = ((n >> pv) & 1) == 1;
+	  Term term = new Term(termNameList.get(pv), bitState);
+	  givenTerms.add(term);
+	}
+    return givenTerms;
   }
 
   public Term inverse() {
@@ -47,4 +61,27 @@ public class Term {
 
   public String name;
   public boolean state;
+
+  /**
+   * Compares this object with the specified object for order.  Returns a
+   * negative integer, zero, or a positive integer
+   */
+  @Override
+  public int compareTo(Term o) {
+    return name.equals(o.name) ? new Boolean(state).compareTo(o.state) : name.compareTo(o.name);
+  }
+
+  public static Set<String> nameSet(Collection<Term> terms) {
+    return terms.stream().map(t -> t.name).collect(Collectors.toSet());
+  }
+
+  public static Set<Set<Term>> combinations(Collection<String> termNames) {
+    int numValues = 1 << termNames.size();
+    Set<Set<Term>> res = new HashSet<>(numValues);
+
+    for (int n = 0; n < numValues; n++) {
+      res.add(Term.nthTermCombination(termNames, n));
+    }
+    return res;
+  }
 }

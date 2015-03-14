@@ -18,10 +18,15 @@ public class Known {
   }
 
   public int maxDepth() {
-    if(input) return 0;
+    if(input || inputTerms.isEmpty()) return 0;
 
-    return inputTerms.entrySet().stream().max((a,b) ->
-            Integer.compare(b.getValue().maxDepth(), a.getValue().maxDepth())).orElseThrow(RuntimeException::new).getValue().maxDepth() + 1;
+    final Map.Entry<Prob, Known> depthValue = inputTerms.entrySet().stream().max((a, b) ->
+            Integer.compare(b.getValue().maxDepth(), a.getValue().maxDepth())).orElseThrow(RuntimeException::new);
+    if(depthValue==null) {
+      return 0;
+    }
+
+    return depthValue.getValue().maxDepth() + 1;
   }
 
   @Override

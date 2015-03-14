@@ -24,8 +24,10 @@ public class And extends AbstractRule {
   public Known solve(Prob wanted, int depth, Map<Prob, Known> alreadyFound) {
     if(++depth > 4) return null;
 
-    if(!wanted.given.isEmpty()) return null;  // only applicable for absolute probs
+//    if(!wanted.given.isEmpty()) return null;  // only applicable for absolute probs
     if(wanted.prime) return null; // Not for primes
+
+    if(!context.depends.allIndependent(Term.nameSet(wanted.terms))) return null; // must all be independent of each other
 
     double result = 1.0;
     StringBuilder formula = new StringBuilder();
@@ -33,11 +35,8 @@ public class And extends AbstractRule {
     Map<Prob, Known> inputTerms = new HashMap<Prob, Known>();
 
     for(Term term : wanted.terms) {
-      if(!context.depends.isIndependent(term.name)) {
-        return null;
-      }
 
-      Prob prob = new Prob(term);
+      Prob prob = new Prob(term, wanted.given);
       Known factor = context.find(prob, depth, mapUnion(inputTerms, alreadyFound));
       if(factor==null) return null;
 

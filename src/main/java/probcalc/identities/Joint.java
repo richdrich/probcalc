@@ -9,7 +9,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by richardparratt on 7/03/15.
+ * Joint probability aka chain rule
+ * P(A) =P(B|A) P(B)
+ * P(A B C) = P(A|B C) | P(B C)
  */
 public class Joint extends AbstractRule {
 	public Joint(Solve solve) {

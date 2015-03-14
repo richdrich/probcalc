@@ -16,7 +16,10 @@ public class Solve {
     makeDepends();
     rules = Arrays.asList(new Rule[]{new Complement(this), new And(this),
             new BayesPartial(this), new BayesFromPartials(this),
-            new Bayes(this), new MultiplyAbsolute(this), new Joint(this)});
+            new Bayes(this), new MultiplyAbsolute(this), new Joint(this),
+            new ConditionalIndependence(this), new AbsoluteIndependence(this),
+            new EliminateDependents(this), new InverseChain(this)
+    });
 
   }
 

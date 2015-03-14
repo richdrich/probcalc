@@ -24,7 +24,7 @@ public class Complement extends AbstractRule {
     if(wanted.prime) return null; // Not for primes
 
     if(wanted.terms.size()==1) {
-      Prob inverseWanted = new Prob(wanted.terms.get(0).inverse(), wanted.given);
+      Prob inverseWanted = new Prob(wanted.terms.iterator().next().inverse(), wanted.given);
       Known inverse = context.find(inverseWanted, depth, alreadyFound);
       if(inverse!=null) {
         Known result = new Known(wanted, 1.0 - inverse.value);

@@ -34,7 +34,7 @@ public class ProbConvert {
     assertThat(Prob.parse("P(D|S)").toString()).isEqualTo("P(D|S)");
     assertThat(Prob.parse("P(D~E|S T)").toString()).isEqualTo("P(D ~E|S T)");
     assertThat(Prob.parse("P(~F)").toString()).isEqualTo("P(~F)");
-    assertThat(Prob.parse("P(G ~F)").toString()).isEqualTo("P(G ~F)");
+    assertThat(Prob.parse("P(~F G)").toString()).isEqualTo("P(~F G)");
     assertThat(Prob.parse("P'(K |Ae)").toString()).isEqualTo("P'(K|Ae)");
   }
 }

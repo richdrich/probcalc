@@ -12,33 +12,33 @@ import java.util.stream.Collectors;
  */
 public class Prob {
   public Prob(Term term) {
-    this.terms = Collections.singletonList(term);
-    this.given = Collections.emptyList();
+    this.terms = new HashSet<>(Arrays.asList(new Term[]{term}));
+    this.given = Collections.emptySet();
   }
 
-  public Prob(Term term,  List<Term> given) {
-    this.terms = Collections.singletonList(term);
-    this.given = given;
+  public Prob(Term term,  Collection<Term> given) {
+    this.terms = new HashSet<>(Arrays.asList(new Term[]{term}));
+    this.given = new HashSet<>(given);
   }
 
   public Prob(Term term, Term given) {
-    this.terms = Collections.singletonList(term);
-    this.given = Collections.singletonList(given);
+    this.terms = new HashSet<>(Arrays.asList(new Term[]{term}));
+    this.given = new HashSet<>(Arrays.asList(new Term[]{given}));
   }
 
-  public Prob(List<Term> terms, Term given) {
-    this.terms = terms;
-    this.given = Collections.singletonList(given);
+  public Prob(Collection<Term> terms, Term given) {
+    this.terms = new HashSet<>(terms);
+    this.given = new HashSet<>(Arrays.asList(new Term[]{given}));
   }
 
-  public Prob(List<Term> terms) {
-    this.terms = terms;
-    this.given = Collections.emptyList();
+  public Prob(Collection<Term> terms) {
+    this.terms = new HashSet<>(terms);
+    this.given = Collections.emptySet();
   }
 
-  public Prob(List<Term> terms, List<Term> given) {
-    this.terms = terms;
-    this.given = given;
+  public Prob(Collection<Term> terms, Collection<Term> given) {
+    this.terms = new HashSet<>(terms);
+    this.given = new HashSet<>(given);
   }
 
   public Prob(Prob prob) {
@@ -60,11 +60,11 @@ public class Prob {
   }
 
   public List<Prob> allTermCombs() {
-    List<String> termNames = terms.stream().map(w -> w.name).collect(Collectors.toList());
+    List<String> termNames = new HashSet<>(terms).stream().map(w -> w.name).collect(Collectors.toList());
 
     List<Prob> res = new ArrayList<>();
     for(int n=0; n<(1 << termNames.size()); n++) {
-      List<Term> condTerms = new ArrayList<>();
+      Set<Term> condTerms = new HashSet<>();
       for (int pv = 0; pv < termNames.size(); pv++) {
         boolean bitState = ((n >> pv) & 1) == 1;
         Term term = new Term(termNames.get(pv), bitState);
@@ -96,10 +96,10 @@ public class Prob {
     return res;
   }
 
-  private static List<Term> extractTerms(String group) {
+  private static Set<Term> extractTerms(String group) {
 
     String[] termStrings = group.trim().replace("|", "").replace("~", " ~").trim().split("\\s");
-    return Arrays.<String>asList(termStrings).stream().filter(s -> !s.trim().isEmpty()).map(s -> {
+    return Arrays.asList(termStrings).stream().filter(s -> !s.trim().isEmpty()).map(s -> {
       s = s.trim();
 
       if(s.startsWith("~")) {
@@ -108,7 +108,7 @@ public class Prob {
       else {
         return new Term(s);
       }
-    }).collect(Collectors.toList());
+    }).collect(Collectors.toSet());
   }
 
   @Override
@@ -118,11 +118,9 @@ public class Prob {
 
     Prob prob = (Prob) o;
 
-    if (prime != prob.prime) return false;
-    if (given != null ? !given.equals(prob.given) : prob.given != null) return false;
-    if (terms != null ? !terms.equals(prob.terms) : prob.terms != null) return false;
+    return prime == prob.prime && !(given != null ? !given.equals(prob.given) : prob.given != null)
+            && !(terms != null ? !terms.equals(prob.terms) : prob.terms != null);
 
-    return true;
   }
 
   @Override
@@ -143,7 +141,7 @@ public class Prob {
 
     res.append("(");
 
-    for(Term term : terms) {
+    for(Term term : terms.stream().sorted().collect(Collectors.toList())) {
       if(!res.toString().endsWith("(")) {
         res.append(" ");
       }
@@ -151,7 +149,7 @@ public class Prob {
     }
     if(!given.isEmpty()) {
       res.append("|");
-      for(Term term : given) {
+      for(Term term : given.stream().sorted().collect(Collectors.toList())) {
         if(!res.toString().endsWith("|")) {
           res.append(" ");
         }
@@ -163,18 +161,15 @@ public class Prob {
   }
 
   public Set<String> allTermNames() {
-    Set<String> res = new HashSet<>();
-    for(Term term : terms) {
-      res.add(term.name);
-    }
+    Set<String> res = terms.stream().map(term -> term.name).collect(Collectors.toSet());
     for(Term term : given) {
       res.add(term.name);
     }
     return res;
   }
 
-  public List<Term> terms;
-  public List<Term> given;
+  public Set<Term> terms;
+  public Set<Term> given;
   public boolean prime;
 
 }
